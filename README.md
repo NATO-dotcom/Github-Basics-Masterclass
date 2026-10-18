@@ -15,11 +15,10 @@
 7. [Branching & Merging](#-branching--merging)
 8. [Working with Remote Repositories](#-working-with-remote-repositories)
 9. [Undoing Changes](#-undoing-changes)
-10. [Advanced Commands](#-advanced-commands)
-11. [Git Best Practices](#-git-best-practices)
-12. [Common Workflows](#-common-workflows)
-13. [Glossary](#-glossary)
-14. [Resources](#-resources)
+10. [Git Best Practices](#-git-best-practices)
+11. [Common Workflows](#-common-workflows)
+12. [Glossary](#-glossary)
+13. [Resources](#-resources)
 
 ---
 
@@ -376,7 +375,7 @@ git checkout branch-name
 git switch branch-name
 ```
 
-> **⚠️ Important:** Make sure your working directory is clean (no uncommitted changes) before switching branches, or stash your changes first (see [Stashing](#stashing)).
+> **⚠️ Important:** Make sure your working directory is clean (no uncommitted changes) before switching branches, or stash your changes first.
 
 ### Merging Branches
 
@@ -467,17 +466,9 @@ git push
 
 # Push a specific branch
 git push origin feature-login
-
-# Force push (DANGEROUS — overwrites remote history)
-git push --force
-
-# Safer force push (fails if someone else pushed first)
-git push --force-with-lease
 ```
 
 > **`-u` (or `--set-upstream`):** Creates a tracking link between your local branch and the remote branch so that future `git push` and `git pull` commands know where to push/pull from.
-
-> **⚠️ WARNING:** Never `--force` push to shared branches like `main` unless you absolutely know what you're doing. Use `--force-with-lease` instead.
 
 ### Pulling Changes
 
@@ -508,22 +499,6 @@ git fetch --prune
 ```
 
 > **`fetch` vs `pull`:** `fetch` downloads updates but doesn't touch your working files. `pull` = `fetch` + `merge`. Use `fetch` when you want to review changes before merging.
-
-### Managing Remote URLs
-
-```bash
-# Change the remote URL
-git remote set-url origin https://new-url.git
-
-# Add an additional push URL
-git remote set-url --add --push origin https://mirror-url.git
-
-# Remove a remote URL
-git remote set-url --delete origin https://old-url.git
-
-# Remove the entire remote
-git remote remove origin
-```
 
 ---
 
@@ -597,212 +572,12 @@ git reset --hard HEAD~1
 
 ---
 
-## ⚡ Advanced Commands
-
-### Stashing
-
-Temporarily save your uncommitted changes without committing them.
-
-```bash
-# Stash your current changes
-git stash
-
-# Stash with a descriptive message
-git stash save "work in progress: login form"
-
-# List all stashes
-git stash list
-
-# Apply the most recent stash (keeps it in the stash list)
-git stash apply
-
-# Apply AND remove the most recent stash
-git stash pop
-
-# Apply a specific stash
-git stash apply stash@{2}
-
-# Delete a specific stash
-git stash drop stash@{0}
-
-# Delete all stashes
-git stash clear
-```
-
-> **When to use:** You're in the middle of work and need to quickly switch branches, but you're not ready to commit yet.
-
-### Rebasing
-
-Replay your commits on top of another branch for a cleaner, linear history.
-
-```bash
-# Rebase current branch onto main
-git rebase main
-
-# Interactive rebase — edit, squash, reorder, or drop commits
-git rebase -i HEAD~3
-
-# Abort a rebase in progress
-git rebase --abort
-
-# Continue after resolving conflicts during rebase
-git rebase --continue
-```
-
-> **`merge` vs `rebase`:** Both integrate changes. `merge` preserves exact history (creates a merge commit). `rebase` rewrites history to be linear (cleaner, but never rebase shared/public branches).
-
-#### Interactive Rebase Options
-
-When you run `git rebase -i HEAD~3`, your editor opens with:
-
-```
-pick a1b2c3d First commit message
-pick e4f5g6h Second commit message
-pick i7j8k9l Third commit message
-```
-
-You can change `pick` to:
-| Command   | What It Does |
-|-----------|-------------|
-| `pick`    | Keep the commit as-is |
-| `reword`  | Keep the commit but edit the message |
-| `squash`  | Combine with the previous commit (keep both messages) |
-| `fixup`   | Combine with the previous commit (discard this message) |
-| `drop`    | Delete the commit entirely |
-| `edit`    | Pause to amend the commit |
-
-### Cherry-Picking
-
-Apply a specific commit from another branch to your current branch.
-
-```bash
-# Apply a single commit
-git cherry-pick <commit-hash>
-
-# Apply without committing (just stage the changes)
-git cherry-pick --no-commit <commit-hash>
-```
-
-> **When to use:** You need a specific bug fix from another branch but don't want to merge the entire branch.
-
-### Tagging
-
-Mark specific points in history as important (e.g., releases).
-
-```bash
-# Create a lightweight tag
-git tag v1.0.0
-
-# Create an annotated tag (recommended — includes metadata)
-git tag -a v1.0.0 -m "Release version 1.0.0"
-
-# List all tags
-git tag
-
-# Push a specific tag to remote
-git push origin v1.0.0
-
-# Push all tags to remote
-git push origin --tags
-
-# Delete a local tag
-git tag -d v1.0.0
-
-# Delete a remote tag
-git push origin --delete v1.0.0
-```
-
-### Git Bisect (Finding Bugs)
-
-Use binary search to find which commit introduced a bug.
-
-```bash
-# Start bisecting
-git bisect start
-
-# Mark the current commit as bad (has the bug)
-git bisect bad
-
-# Mark a known good commit (didn't have the bug)
-git bisect good <commit-hash>
-
-# Git checks out a commit halfway between — test it, then:
-git bisect good   # if this commit works fine
-git bisect bad    # if this commit has the bug
-
-# When done, reset to your original branch
-git bisect reset
-```
-
-### Git Reflog (Safety Net)
-
-View a log of everywhere `HEAD` has pointed — even after resets and rebases.
-
-```bash
-# View the reflog
-git reflog
-
-# Recover a "lost" commit
-git checkout <reflog-hash>
-```
-
-> **When to use:** You accidentally ran `git reset --hard` and need to recover lost work. The reflog keeps a record of every change for ~90 days.
-
-### Git Blame
-
-See who last modified each line of a file.
-
-```bash
-# Show author and commit for each line
-git blame filename.txt
-
-# Blame a specific range of lines
-git blame -L 10,20 filename.txt
-```
-
-### Git Clean
-
-Remove untracked files from the working directory.
-
-```bash
-# Dry run — show what WOULD be removed
-git clean -n
-
-# Remove untracked files
-git clean -f
-
-# Remove untracked files AND directories
-git clean -fd
-
-# Remove ignored files too
-git clean -fdx
-```
-
-> **⚠️ WARNING:** `git clean -f` permanently deletes files. Always run `git clean -n` first to preview.
-
-### Git Worktree
-
-Work on multiple branches simultaneously without stashing or switching.
-
-```bash
-# Create a worktree for another branch in a separate directory
-git worktree add ../feature-branch feature-login
-
-# List all worktrees
-git worktree list
-
-# Remove a worktree
-git worktree remove ../feature-branch
-```
-
----
-
 ## ✅ Git Best Practices
 
 ### Commits
 
 | ✅ Do | ❌ Don't |
-|-------|---------|
+|-------|---------| 
 | Make small, focused commits | Make huge commits with unrelated changes |
 | Write descriptive messages | Write vague messages like "fix" or "update" |
 | Commit often | Wait days between commits |
@@ -811,7 +586,7 @@ git worktree remove ../feature-branch
 ### Branching
 
 | ✅ Do | ❌ Don't |
-|-------|---------|
+|-------|---------| 
 | Use feature branches for new work | Commit directly to `main` |
 | Use descriptive branch names: `feature/user-auth` | Use vague names: `test`, `branch1` |
 | Delete branches after merging | Leave dozens of stale branches |
@@ -831,10 +606,9 @@ chore/description       → chore/update-dependencies
 ### Collaboration
 
 | ✅ Do | ❌ Don't |
-|-------|---------|
+|-------|---------| 
 | Pull before you push | Push without checking for updates |
 | Use Pull Requests for code review | Push directly to shared branches |
-| Use `--force-with-lease` if you must force push | Use `--force` on shared branches |
 | Communicate with your team about rebases | Silently rewrite shared history |
 
 ### The `.gitignore` File
@@ -963,10 +737,8 @@ git push origin fix/typo-in-docs
 | **Fork** | A personal copy of someone else's repository on GitHub |
 | **Pull Request (PR)** | A request to merge your branch's changes into another branch |
 | **Merge** | Combining changes from one branch into another |
-| **Rebase** | Re-applying commits on top of another branch for a linear history |
-| **Stash** | Temporarily shelving uncommitted changes |
-| **Tag** | A named reference to a specific commit (often used for releases) |
 | **Conflict** | When Git can't automatically merge changes and needs human help |
+| **Tag** | A named reference to a specific commit (often used for releases) |
 
 ---
 
@@ -992,13 +764,13 @@ git config --global             git commit -m "msg"             git switch -c <n
                                 git log --oneline               git merge <branch>
                                 git diff                        git branch -d <name>
 
-REMOTE                          UNDO                            ADVANCED
-──────                          ────                            ────────
-git remote add origin <url>     git restore <file>              git stash
-git push -u origin main         git restore --staged <file>     git rebase -i HEAD~3
-git pull origin main            git commit --amend              git cherry-pick <hash>
-git fetch                       git revert <hash>               git bisect start
-git clone <url>                 git reset --hard HEAD~1         git reflog
+REMOTE                          UNDO
+──────                          ────
+git remote add origin <url>     git restore <file>
+git push -u origin main         git restore --staged <file>
+git pull origin main            git commit --amend
+git fetch                       git revert <hash>
+git clone <url>                 git reset --hard HEAD~1
 ```
 
 ---
